@@ -13,14 +13,15 @@
 <body>
 <h2>DFS/BFS 二分探索木 可視化（ノード15固定）</h2>
 
-<label>探索対象ノード（0〜14）</label>
-<input type="number" id="targetNode" value="7" min="0" max="14">
-
 <label>探索アルゴリズム</label>
 <select id="algorithm">
   <option value="DFS">深さ優先探索</option>
   <option value="BFS">幅優先探索</option>
 </select>
+
+<label>アニメーション速度</label>
+<input type="range" id="speedSlider" min="1" max="5" value="3">
+<span id="speedValue">3</span>
 
 <button onclick="runAlgorithm()">実行</button>
 
@@ -29,7 +30,7 @@
 
 <script>
 const NODE_COUNT = 15;
-const SPEED = 3;
+const TARGET_NODE = 7; // 探索対象ノード固定
 
 let nodes = [];
 let edges = [];
@@ -39,10 +40,11 @@ let counter = 0;
 let animationRunning = false;
 let visited = [];
 let foundNode = -1;
+let speed = 3;
 
 function setup(){
   createCanvas(900,400).parent(document.body);
-  frameRate(SPEED*2);
+  frameRate(speed*2);
   generateTree();
 }
 
@@ -147,24 +149,31 @@ function dfsBfs(start,target,algo){
 }
 
 function runAlgorithm(){
-  let target=parseInt(document.getElementById("targetNode").value);
   let algo=document.getElementById("algorithm").value;
   steps=[];
   visited.fill(0);
   counter=0;
   animationRunning=true;
   foundNode=-1;
-  dfsBfs(0,target,algo);
+  speed=parseInt(document.getElementById("speedSlider").value);
+  frameRate(speed*2);
+  document.getElementById("speedValue").innerText=speed;
+  dfsBfs(0,TARGET_NODE,algo);
 }
 
 function showResult(){
-  let target=parseInt(document.getElementById("targetNode").value);
   if(foundNode>=0){
-    document.getElementById("resultDisplay").innerText="探索完了：ノード "+target+" を見つけました";
+    document.getElementById("resultDisplay").innerText="探索完了：ノード "+TARGET_NODE+" を見つけました";
   }else{
-    document.getElementById("resultDisplay").innerText="探索完了：ノード "+target+" は存在しません";
+    document.getElementById("resultDisplay").innerText="探索完了：ノード "+TARGET_NODE+" は存在しません";
   }
 }
+
+// スライダー値表示更新
+document.getElementById("speedSlider").addEventListener("input",()=>{
+  let val=parseInt(document.getElementById("speedSlider").value);
+  document.getElementById("speedValue").innerText=val;
+});
 </script>
 </body>
 </html>
