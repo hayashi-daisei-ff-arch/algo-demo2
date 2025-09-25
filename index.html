@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>DFS/BFS 二分木可視化</title>
+<title>DFS/BFS 二分探索木可視化</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
 <style>
   label { display: block; margin-top: 5px; }
@@ -90,6 +90,18 @@ function drawTree(){
   }
 }
 
+// 再帰的に二分木ノード位置を計算
+function layoutTree(index, xMin, xMax, y, level){
+  let x = (xMin + xMax)/2;
+  nodes[index].x = x;
+  nodes[index].y = y;
+  let left = 2*index+1;
+  let right = 2*index+2;
+  let yStep = 50;
+  if(left < nodes.length) layoutTree(left, xMin, x, y+yStep, level+1);
+  if(right < nodes.length) layoutTree(right, x, xMax, y+yStep, level+1);
+}
+
 function generateTree(){
   let n = parseInt(document.getElementById("nodeCount").value);
   nodes = [];
@@ -97,28 +109,20 @@ function generateTree(){
   adj = [];
   visited = [];
   for(let i=0;i<n;i++){
+    nodes.push({x:0, y:0});
     adj.push([]);
     visited.push(0);
   }
 
-  // 親子関係で二分木構造
+  // 二分木の親子関係
   for(let i=0;i<n;i++){
-    let left = 2*i + 1;
-    let right = 2*i + 2;
+    let left = 2*i+1;
+    let right = 2*i+2;
     if(left<n){ adj[i].push(left); adj[left].push(i); edges.push([i,left]); }
     if(right<n){ adj[i].push(right); adj[right].push(i); edges.push([i,right]); }
   }
 
-  // ノード位置決定（単純な二分木レイアウト）
-  let levels = Math.ceil(Math.log2(n+1));
-  for(let i=0;i<n;i++){
-    let level = Math.floor(Math.log2(i+1));
-    let indexInLevel = i - (Math.pow(2,level)-1);
-    let maxInLevel = Math.pow(2,level);
-    let x = (indexInLevel+0.5)*(width/maxInLevel);
-    let y = 50 + level*(height-50)/levels;
-    nodes[i] = {x:x, y:y};
-  }
+  layoutTree(0, 50, width-50, 50, 0); // 再帰的に位置決定
 
   steps = [];
   counter = 0;
@@ -137,7 +141,7 @@ function runAlgorithm(){
   animationRunning = true;
   foundNode=-1;
   document.getElementById("resultDisplay").innerText = "";
-  dfsBfs(0, target, algo); // 0番ノードから探索
+  dfsBfs(0, target, algo);
 }
 
 function dfsBfs(start, target, algo){
