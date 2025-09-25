@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>DFS/BFS 可視化</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
+<style>
+  label { display: block; margin-top: 5px; }
+  #resultDisplay { margin-top: 5px; font-weight: bold; }
+</style>
+</head>
+<body>
+<h2>深さ優先探索・幅優先探索 可視化デモ</h2>
+
+<label>ノード数（最大20）</label>
+<input type="number" id="nodeCount" value="8" min="2" max="20" onchange="generateGraph()">
+
+<label>探索対象ノード番号（0〜ノード数-1）</label>
+<input type="number" id="targetNode" value="5" min="0">
+
+<label>探索アルゴリズム</label>
+<select id="algorithm">
+  <option value="DFS">深さ優先探索</option>
+  <option value="BFS">幅優先探索</option>
+</select>
+
+<label>アニメーション速度（1〜5）</label>
+<input type="range" id="speed" min="1" max="5" value="3" onchange="updateFrameRate()">
+
+<button onclick="runAlgorithm()">実行</button>
+<p id="counter">操作数: 0</p>
+<p id="resultDisplay"></p>
+
+<script>
+let nodes = [];
+let edges = [];
+let adj = [];
+let steps = [];
+let counter = 0;
+let animationRunning = false;
+let visited = [];
+let foundNode = -1;
+
+function setup(){
+  createCanvas(800, 400).parent(document.body);
+  updateFrameRate();
+  generateGraph();
+}
+
+function draw(){
+  background(255);
+
+  if(animationRunning && counter < steps.length){
+    let cur = steps[counter];
+    if(cur !== null) visited[cur] = 2; // 現在探索中
+    drawGraph();
+    if(cur !== null) visited[cur] = 1; // 探索済みに戻す
+    counter++;
+    document.getElementById("counter").innerText = "操作数: " + counter;
+    if(counter >= steps.length){
+      animationRunning = false;
+      showResult();
+    }
+  } else {
+    drawGraph();
+  }
+}
+
+function drawGraph(){
+  // 辺
+  stroke(0);
+  for(let e of edges){
+    line(nodes[e[0]].x, nodes[e[0]].y, nodes[e[1]].x, nodes[e[1]].y);
+  }
+
+  // ノード
+  for(let i=0;i<nodes.length;i++){
+    let c = color(0,0,255); // 青
+    if(visited[i]===1) c = color(200); // 灰色
+    if(visited[i]===2) c = color(255,0,0); // 赤
+    if(i===foundNode) c = color(255,255,0); // 黄色
+
+    fill(c);
+    stroke(0);
+    ellipse(nodes[i].x, nodes[i].y, 40, 40);
+    fill(0);
+    noStroke();
+    textAlign(CENTER, CENTER);
+    text(i, nodes[i].x, nodes[i].y);
+  }
+}
+
+function generateGraph(){
+  let n = parseInt(document.getElementById("nodeCount").value);
+  nodes = [];
+  edges = [];
+  adj = [];
+  visited = [];
+  for(let i=0;i<n;i++){
+    nodes.push({x: random(50, width-50), y: random(50, height-50)});
+    adj.push([]);
+    visited.push(0);
+  }
+
+  // ランダムに辺を作る
+  for(let i=0;i<n;i++){
+    for(let j=i+1;j<n;j++){
+      if(random() < 0.3){
+        adj[i].push(j);
+        adj[j].push(i);
+        edges.push([i,j]);
+      }
+    }
+  }
+
+  steps = [];
+  counter = 0;
+  animationRunning = false;
+  foundNode = -1;
+  document.getElementById("counter").innerText = "操作数: 0";
+  document.getElementById("resultDisplay").innerText = "";
+}
+
+function runAlgorithm(){
+  let target = parseInt(document.getElementById("targetNode").value);
+  let algo = document.getElementById("algorithm").value;
+  steps = [];
+  visited.fill(0);
+  counter=0;
+  animationRunning = true;
+  foundNode=-1;
+  document.getElementById("resultDisplay").innerText = "";
+  dfsBfs(0, target, algo); // 0番ノードから探索
+}
+
+function dfsBfs(start, target, algo){
+  let n = nodes.length;
+  let visitedLocal = new Array(n).fill(false);
+  if(algo==='DFS'){
+    let stack = [start];
+    while(stack.length>0){
+      let u = stack.pop();
+      if(visitedLocal[u]) continue;
+      steps.push(u);
+      visitedLocal[u]=true;
+      if(u===target){foundNode=u; break;}
+      for(let v of adj[u].slice().reverse()){
+        if(!visitedLocal[v]) stack.push(v);
+      }
+    }
+  } else if(algo==='BFS'){
+    let queue = [start];
+    visitedLocal[start]=true;
+    while(queue.length>0){
+      let u = queue.shift();
+      steps.push(u);
+      if(u===target){foundNode=u; break;}
+      for(let v of adj[u]){
+        if(!visitedLocal[v]){
+          visitedLocal[v]=true;
+          queue.push(v);
+        }
+      }
+    }
+  }
+}
+
+function showResult(){
+  let target = parseInt(document.getElementById("targetNode").value);
+  if(foundNode>=0){
+    document.getElementById("resultDisplay").innerText="探索完了：ノード "+target+" を見つけました";
+  } else {
+    document.getElementById("resultDisplay").innerText="探索完了：ノード "+target+" は存在しません";
+  }
+}
+
+function updateFrameRate(){
+  let speed = parseInt(document.getElementById("speed").value);
+  frameRate(speed*2);
+}
+</script>
+</body>
+</html>
