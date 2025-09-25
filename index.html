@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>DFS/BFS 可視化</title>
+<title>DFS/BFS 二分木可視化</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
 <style>
   label { display: block; margin-top: 5px; }
@@ -10,13 +10,13 @@
 </style>
 </head>
 <body>
-<h2>深さ優先探索・幅優先探索 可視化デモ</h2>
+<h2>DFS/BFS 二分探索木 可視化デモ</h2>
 
 <label>ノード数（最大20）</label>
-<input type="number" id="nodeCount" value="8" min="2" max="20" onchange="generateGraph()">
+<input type="number" id="nodeCount" value="7" min="1" max="20" onchange="generateTree()">
 
 <label>探索対象ノード番号（0〜ノード数-1）</label>
-<input type="number" id="targetNode" value="5" min="0">
+<input type="number" id="targetNode" value="3" min="0">
 
 <label>探索アルゴリズム</label>
 <select id="algorithm">
@@ -44,7 +44,7 @@ let foundNode = -1;
 function setup(){
   createCanvas(800, 400).parent(document.body);
   updateFrameRate();
-  generateGraph();
+  generateTree();
 }
 
 function draw(){
@@ -53,7 +53,7 @@ function draw(){
   if(animationRunning && counter < steps.length){
     let cur = steps[counter];
     if(cur !== null) visited[cur] = 2; // 現在探索中
-    drawGraph();
+    drawTree();
     if(cur !== null) visited[cur] = 1; // 探索済みに戻す
     counter++;
     document.getElementById("counter").innerText = "操作数: " + counter;
@@ -62,11 +62,11 @@ function draw(){
       showResult();
     }
   } else {
-    drawGraph();
+    drawTree();
   }
 }
 
-function drawGraph(){
+function drawTree(){
   // 辺
   stroke(0);
   for(let e of edges){
@@ -90,27 +90,34 @@ function drawGraph(){
   }
 }
 
-function generateGraph(){
+function generateTree(){
   let n = parseInt(document.getElementById("nodeCount").value);
   nodes = [];
   edges = [];
   adj = [];
   visited = [];
   for(let i=0;i<n;i++){
-    nodes.push({x: random(50, width-50), y: random(50, height-50)});
     adj.push([]);
     visited.push(0);
   }
 
-  // ランダムに辺を作る
+  // 親子関係で二分木構造
   for(let i=0;i<n;i++){
-    for(let j=i+1;j<n;j++){
-      if(random() < 0.3){
-        adj[i].push(j);
-        adj[j].push(i);
-        edges.push([i,j]);
-      }
-    }
+    let left = 2*i + 1;
+    let right = 2*i + 2;
+    if(left<n){ adj[i].push(left); adj[left].push(i); edges.push([i,left]); }
+    if(right<n){ adj[i].push(right); adj[right].push(i); edges.push([i,right]); }
+  }
+
+  // ノード位置決定（単純な二分木レイアウト）
+  let levels = Math.ceil(Math.log2(n+1));
+  for(let i=0;i<n;i++){
+    let level = Math.floor(Math.log2(i+1));
+    let indexInLevel = i - (Math.pow(2,level)-1);
+    let maxInLevel = Math.pow(2,level);
+    let x = (indexInLevel+0.5)*(width/maxInLevel);
+    let y = 50 + level*(height-50)/levels;
+    nodes[i] = {x:x, y:y};
   }
 
   steps = [];
