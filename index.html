@@ -13,6 +13,9 @@
 <body>
 <h2>DFS/BFS 二分探索木 可視化（ノード15固定）</h2>
 
+<label>探索対象ノード</label>
+<input type="number" id="targetNode" value="7">
+
 <label>探索アルゴリズム</label>
 <select id="algorithm">
   <option value="DFS">深さ優先探索</option>
@@ -30,7 +33,6 @@
 
 <script>
 const NODE_COUNT = 15;
-const TARGET_NODE = 7; // 探索対象ノード固定
 
 let nodes = [];
 let edges = [];
@@ -149,6 +151,7 @@ function dfsBfs(start,target,algo){
 }
 
 function runAlgorithm(){
+  let target = parseInt(document.getElementById("targetNode").value);
   let algo=document.getElementById("algorithm").value;
   steps=[];
   visited.fill(0);
@@ -158,14 +161,15 @@ function runAlgorithm(){
   speed=parseInt(document.getElementById("speedSlider").value);
   frameRate(speed*2);
   document.getElementById("speedValue").innerText=speed;
-  dfsBfs(0,TARGET_NODE,algo);
+  dfsBfs(0,target,algo);
 }
 
 function showResult(){
+  let target = parseInt(document.getElementById("targetNode").value);
   if(foundNode>=0){
-    document.getElementById("resultDisplay").innerText="探索完了：ノード "+TARGET_NODE+" を見つけました";
+    document.getElementById("resultDisplay").innerText="探索完了：ノード "+target+" を見つけました";
   }else{
-    document.getElementById("resultDisplay").innerText="探索完了：ノード "+TARGET_NODE+" は存在しません";
+    document.getElementById("resultDisplay").innerText="探索完了：ノード "+target+" は存在しません";
   }
 }
 
