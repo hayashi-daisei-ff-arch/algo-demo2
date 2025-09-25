@@ -48,9 +48,8 @@ function drawTree(){
   for(let e of edges){
     line(nodes[e[0]].x, nodes[e[0]].y, nodes[e[1]].x, nodes[e[1]].y);
   }
-
   for(let i=0;i<nodes.length;i++){
-    let c = color(0,0,255);
+    let c=color(0,0,255);
     if(visited[i]===1) c=color(200);
     if(visited[i]===2) c=color(255,0,0);
     if(i===foundNode) c=color(255,255,0);
@@ -60,20 +59,20 @@ function drawTree(){
     fill(0);
     noStroke();
     textAlign(CENTER,CENTER);
-    text(i, nodes[i].x, nodes[i].y);
+    text(i,nodes[i].x,nodes[i].y);
   }
 }
 
-// 部分木幅を計算して再帰的にx座標を決定
+// 部分木幅を決定論的に計算して再帰配置
 function layoutTree(index, depth, xMin, xMax){
-  let x = (xMin+xMax)/2;
-  let yStep = 60;
-  let y = 50 + depth*yStep;
+  let x=(xMin+xMax)/2;
+  let yStep=60;
+  let y=50 + depth*yStep;
   nodes[index].x = x;
   nodes[index].y = y;
 
-  let left = 2*index+1;
-  let right = 2*index+2;
+  let left = 2*index + 1;
+  let right = 2*index + 2;
 
   if(left<nodes.length) layoutTree(left, depth+1, xMin, x);
   if(right<nodes.length) layoutTree(right, depth+1, x, xMax);
@@ -81,27 +80,28 @@ function layoutTree(index, depth, xMin, xMax){
 
 // 二分木生成
 function generateTree(){
-  let n = parseInt(document.getElementById("nodeCount").value);
-  nodes = [];
-  edges = [];
-  adj = [];
-  visited = [];
+  let n=parseInt(document.getElementById("nodeCount").value);
+  nodes=[];
+  edges=[];
+  adj=[];
+  visited=[];
   for(let i=0;i<n;i++){
     nodes.push({x:0,y:0});
     adj.push([]);
     visited.push(0);
   }
 
+  // 親子関係
   for(let i=0;i<n;i++){
-    let left = 2*i+1;
-    let right = 2*i+2;
+    let left=2*i+1;
+    let right=2*i+2;
     if(left<n){ adj[i].push(left); adj[left].push(i); edges.push([i,left]); }
     if(right<n){ adj[i].push(right); adj[right].push(i); edges.push([i,right]); }
   }
 
-  layoutTree(0,0,50,width-50);
+  layoutTree(0,0,50,width-50); // 再帰配置（決定論的）
 
-  steps = [];
+  steps=[];
   counter=0;
   animationRunning=false;
   foundNode=-1;
@@ -111,12 +111,12 @@ function generateTree(){
 
 // DFS/BFS探索
 function dfsBfs(start,target,algo){
-  let n = nodes.length;
+  let n=nodes.length;
   let visitedLocal = new Array(n).fill(false);
   if(algo==='DFS'){
     let stack=[start];
     while(stack.length>0){
-      let u = stack.pop();
+      let u=stack.pop();
       if(visitedLocal[u]) continue;
       steps.push(u);
       visitedLocal[u]=true;
@@ -127,7 +127,7 @@ function dfsBfs(start,target,algo){
     let queue=[start];
     visitedLocal[start]=true;
     while(queue.length>0){
-      let u = queue.shift();
+      let u=queue.shift();
       steps.push(u);
       if(u===target){foundNode=u; break;}
       for(let v of adj[u]){
@@ -141,8 +141,8 @@ function dfsBfs(start,target,algo){
 }
 
 function runAlgorithm(){
-  let target = parseInt(document.getElementById("targetNode").value);
-  let algo = document.getElementById("algorithm").value;
+  let target=parseInt(document.getElementById("targetNode").value);
+  let algo=document.getElementById("algorithm").value;
   steps=[];
   visited.fill(0);
   counter=0;
@@ -153,7 +153,7 @@ function runAlgorithm(){
 }
 
 function showResult(){
-  let target = parseInt(document.getElementById("targetNode").value);
+  let target=parseInt(document.getElementById("targetNode").value);
   if(foundNode>=0){
     document.getElementById("resultDisplay").innerText="探索完了：ノード "+target+" を見つけました";
   }else{
@@ -162,7 +162,7 @@ function showResult(){
 }
 
 function updateFrameRate(){
-  let speed = parseInt(document.getElementById("speed").value);
+  let speed=parseInt(document.getElementById("speed").value);
   frameRate(speed*2);
 }
 
@@ -180,7 +180,7 @@ function draw(){
     if(cur!==null) visited[cur]=1;
     counter++;
     document.getElementById("counter").innerText="操作数: "+counter;
-    if(counter>=steps.length) {animationRunning=false; showResult();}
+    if(counter>=steps.length){ animationRunning=false; showResult(); }
   }else{
     drawTree();
   }
