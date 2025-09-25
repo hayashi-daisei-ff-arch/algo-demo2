@@ -6,22 +6,30 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
 <style>
   body { text-align:center; font-family:sans-serif; }
+  label { display:block; margin-top:5px; }
   #resultDisplay { font-weight:bold; margin-top:10px; }
 </style>
 </head>
 <body>
 <h2>DFS/BFS 二分探索木 可視化（ノード15固定）</h2>
 
-<p>探索対象ノード：7（固定）</p>
-<p>探索アルゴリズム：DFS / BFS（固定）</p>
+<label>探索対象ノード（0〜14）</label>
+<input type="number" id="targetNode" value="7" min="0" max="14">
+
+<label>探索アルゴリズム</label>
+<select id="algorithm">
+  <option value="DFS">深さ優先探索</option>
+  <option value="BFS">幅優先探索</option>
+</select>
+
+<button onclick="runAlgorithm()">実行</button>
+
 <p id="counter">操作数: 0</p>
 <p id="resultDisplay"></p>
 
 <script>
 const NODE_COUNT = 15;
-const TARGET_NODE = 7; // 探索対象
-const ALGO = 'DFS'; // 'DFS' または 'BFS'
-const SPEED = 3; // アニメーション速度
+const SPEED = 3;
 
 let nodes = [];
 let edges = [];
@@ -52,7 +60,6 @@ function draw(){
   }
 }
 
-// ノード描画
 function drawTree(){
   background(255);
   stroke(0);
@@ -74,7 +81,6 @@ function drawTree(){
   }
 }
 
-// 完全二分木生成（ノード数固定15）
 function generateTree(){
   nodes=[];
   edges=[];
@@ -94,12 +100,11 @@ function generateTree(){
   layoutTree(0,0,50,width-50);
   steps=[];
   counter=0;
-  animationRunning=true;
+  animationRunning=false;
   foundNode=-1;
-  dfsBfs(0,TARGET_NODE,ALGO);
+  drawTree();
 }
 
-// 再帰的にx,y座標を決定（完全決定論的）
 function layoutTree(index, depth, xMin, xMax){
   let x=(xMin+xMax)/2;
   let y = 50 + depth*60;
@@ -111,7 +116,6 @@ function layoutTree(index, depth, xMin, xMax){
   if(right<NODE_COUNT) layoutTree(right,depth+1,x,xMax);
 }
 
-// DFS/BFS探索
 function dfsBfs(start,target,algo){
   let n = NODE_COUNT;
   let visitedLocal = new Array(n).fill(false);
@@ -142,11 +146,23 @@ function dfsBfs(start,target,algo){
   }
 }
 
+function runAlgorithm(){
+  let target=parseInt(document.getElementById("targetNode").value);
+  let algo=document.getElementById("algorithm").value;
+  steps=[];
+  visited.fill(0);
+  counter=0;
+  animationRunning=true;
+  foundNode=-1;
+  dfsBfs(0,target,algo);
+}
+
 function showResult(){
+  let target=parseInt(document.getElementById("targetNode").value);
   if(foundNode>=0){
-    document.getElementById("resultDisplay").innerText="探索完了：ノード "+TARGET_NODE+" を見つけました";
+    document.getElementById("resultDisplay").innerText="探索完了：ノード "+target+" を見つけました";
   }else{
-    document.getElementById("resultDisplay").innerText="探索完了：ノード "+TARGET_NODE+" は存在しません";
+    document.getElementById("resultDisplay").innerText="探索完了：ノード "+target+" は存在しません";
   }
 }
 </script>
